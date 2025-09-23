@@ -1,11 +1,3 @@
-body {
-    padding-top: 70px;
-}
-
-.page-section {
-    display: none;
-}
-
 .page-section.active {
     display: block;
 }
@@ -41,7 +33,11 @@ body {
     --note-link-dark: #495057;
 }
 
-.navbar-bg {
+.navbar {
+    background-color: #000000 !important;
+}
+
+.bg-dark {
     background-color: #000000 !important;
 }
 
@@ -112,26 +108,16 @@ pre::before {
     letter-spacing: 0.02em;
 }
 
+/* Boutons flottants : bas-droite, au-dessus du contenu */
 .floating-controls {
-    position: fixed;
-    right: 1rem;
-    bottom: 1rem;
-    z-index: 1080;
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-    border-radius: 15px;
-    padding: 0.75rem;
-    border: 1px solid var(--code-border-dark);
-    background: color-mix(in hsl, var(--bs-body-bg) 70%, transparent);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 1050;            /* au-dessus des cartes/accordions */
+  backdrop-filter: blur(6px);
 }
-
 .floating-controls .btn {
-    min-width: 2.25rem;
-}
-
-.floating-controls {
-    display: none;
+  border-width: 1px;
 }
 
 code.language-bash {
