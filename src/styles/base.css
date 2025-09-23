@@ -1,0 +1,186 @@
+body {
+    padding-top: 70px;
+}
+
+.page-section {
+    display: none;
+}
+
+.page-section.active {
+    display: block;
+}
+
+.toc a {
+    text-decoration: none;
+}
+
+.toc a:hover {
+    text-decoration: underline;
+}
+
+.accordion-button::after {
+    transform: rotate(-90deg);
+}
+
+.accordion-button:not(.collapsed)::after {
+    transform: rotate(0deg);
+}
+
+:root {
+    --code-bg-dark: #1e1e2f;
+    --code-border-dark: #2d2d3a;
+    --code-text-dark: #e6e6e6;
+    --note-link-dark: #adb5bd;
+}
+
+[data-bs-theme="light"] {
+    --bs-body-bg: #ffffff;
+    --code-bg-dark: #f6f8fa;
+    --code-border-dark: #d0d7de;
+    --code-text-dark: #24292f;
+    --note-link-dark: #495057;
+}
+
+.navbar-bg {
+    background-color: #000000 !important;
+}
+
+.nav-link {
+    color: white !important;
+}
+
+.nav-link:hover {
+    font-weight: bold;
+    color: white !important;
+}
+
+.mb--50 {
+    margin-bottom: -42px;
+}
+
+.mb--25 {
+    margin-bottom: -25px;
+}
+
+.mt--25 {
+    margin-top: -25px;
+}
+
+.btn-network {
+    width: 110px;
+}
+
+.fixed {
+    position: fixed !important;
+}
+
+.pl-4 {
+    padding-left: 4em;
+}
+
+pre {
+    position: relative;
+    background-color: var(--code-bg-dark);
+    border: 1px solid var(--code-border-dark);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    font-size: 0.92rem;
+    line-height: 1.55;
+    margin-bottom: 1rem;
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.35);
+}
+
+pre code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    color: var(--code-text-dark);
+    background: transparent;
+    display: block;
+    white-space: pre;
+}
+
+pre::before {
+    content: "terminal";
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: var(--code-border-dark);
+    color: var(--note-link-dark);
+    font-size: 0.7rem;
+    padding: 0.25rem 0.5rem;
+    border-bottom-right-radius: 8px;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    letter-spacing: 0.02em;
+}
+
+.floating-controls {
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 1080;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border-radius: 15px;
+    padding: 0.75rem;
+    border: 1px solid var(--code-border-dark);
+    background: color-mix(in hsl, var(--bs-body-bg) 70%, transparent);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+}
+
+.floating-controls .btn {
+    min-width: 2.25rem;
+}
+
+.floating-controls {
+    display: none;
+}
+
+code.language-bash {
+    padding-top: 15px;
+}
+
+pre.terminal {
+    background-color: var(--code-bg-dark);
+    border: 1px solid var(--code-border-dark);
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    padding-top: 2rem;
+    font-family: monospace;
+    font-size: 0.9rem;
+    color: var(--code-text-dark);
+}
+
+pre.terminal .output {
+    display: block;
+}
+
+/* Prompt / commande / sortie en mode sombre */
+[data-bs-theme="dark"] pre.terminal .prompt {
+    color: #7dd3fc;
+    /* bleu clair */
+}
+
+[data-bs-theme="dark"] pre.terminal .command {
+    color: #a3e635;
+    /* vert clair */
+}
+
+[data-bs-theme="dark"] pre.terminal .output {
+    color: #f3f4f6;
+    /* gris très clair */
+}
+
+/* Prompt / commande / sortie en mode clair */
+[data-bs-theme="light"] pre.terminal .prompt {
+    color: #1d4ed8;
+    /* bleu foncé */
+}
+
+[data-bs-theme="light"] pre.terminal .command {
+    color: #15803d;
+    /* vert foncé */
+}
+
+[data-bs-theme="light"] pre.terminal .output {
+    color: #111827;
+    /* presque noir */
+}
