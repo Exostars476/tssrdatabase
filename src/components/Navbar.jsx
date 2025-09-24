@@ -51,6 +51,11 @@ export default function Navbar({ onNavigate, onToggleTheme, theme, contrastClass
                             </button>
                         </li>
                         <li className="nav-item">
+                            <button className="btn btn-link nav-link" onClick={() => go("windows_page")}>
+                                💻 Windows
+                            </button>
+                        </li>
+                        <li className="nav-item">
                             <button className="btn btn-link nav-link" onClick={() => go("network_page")}>
                                 🌐 Réseaux
                             </button>

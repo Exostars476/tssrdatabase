@@ -7,6 +7,7 @@ import RouterPage from "./pages/Routeur";
 import SwitchPage from './pages/Switch';
 import LinuxPage from './pages/Linux';
 import NetworkPage from './pages/Network';
+import WindowsPage from './pages/Windows';
 
 function App() {
   const [page, setPage] = useState("home");
@@ -39,6 +40,13 @@ function App() {
         )}
         {page === "linux_commands_page" && (
           <LinuxPage
+            contrastClass={contrastClass}
+            onToggleTheme={toggleTheme}
+            theme={theme}
+          />
+        )}
+        {page === "windows_page" && (
+          <WindowsPage
             contrastClass={contrastClass}
             onToggleTheme={toggleTheme}
             theme={theme}
