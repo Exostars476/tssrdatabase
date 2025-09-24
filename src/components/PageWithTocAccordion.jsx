@@ -48,6 +48,14 @@ export default function PageWithTocAccordion({
         if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
     }, []);
 
+    const toggleOne = (collapseId) => {
+        const el = document.getElementById(collapseId);
+        if (!el) return;
+        // crée/récupère l'instance et toggle
+        const inst = Collapse.getOrCreateInstance(el, { toggle: false });
+        inst.toggle();
+    };
+
     return (
         <section className="page-section mt-6">
             <div className="container">
@@ -97,8 +105,9 @@ export default function PageWithTocAccordion({
                                         <button
                                             className="accordion-button collapsed"
                                             type="button"
-                                            data-bs-toggle="collapse"
-                                            data-bs-target={`#${it.collapseId}`}
+                                            onClick={() => toggleOne(it.collapseId)}
+                                            aria-expanded="false"
+                                            aria-controls={it.collapseId}
                                         >
                                             {it.icon ? <span className="me-2">{it.icon}</span> : null}
                                             {it.title}
