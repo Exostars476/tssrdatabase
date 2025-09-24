@@ -6,6 +6,7 @@ import Home from "./pages/Home";
 import RouterPage from "./pages/Routeur";
 import SwitchPage from './pages/Switch';
 import LinuxPage from './pages/Linux';
+import NetworkPage from './pages/Network';
 
 function App() {
   const [page, setPage] = useState("home");
@@ -43,7 +44,7 @@ function App() {
             theme={theme}
           />
         )}
-        {page === "network_page" && <h1>🌐 Réseaux</h1>}
+        {page === "network_page" && <NetworkPage />}
       </main>
     </>
   )

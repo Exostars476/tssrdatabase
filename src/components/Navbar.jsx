@@ -16,8 +16,8 @@ export default function Navbar({ onNavigate, onToggleTheme, theme, contrastClass
     };
 
     return (
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top navbar-bg">
-            <div class="container-fluid">
+        <nav className="navbar navbar-expand-lg navbar-dark bg-dark fixed-top navbar-bg">
+            <div className="container-fluid">
                 <a className="navbar-brand" href="#" onClick={(e) => {
                     e.preventDefault();
                     go("home");
