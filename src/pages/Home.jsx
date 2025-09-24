@@ -1,7 +1,7 @@
 export default function Home({ onNavigate }) {
   return (
     <section id="home" className="page-section active bg-body text-center">
-      <div className="container">
+      <div className="container mt-6">
         <h1 className="mb-4 mt-4">Base de connaissances TSSR</h1>
 
         {/* Première rangée de 3 cartes */}

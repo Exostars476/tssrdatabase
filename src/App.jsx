@@ -1,9 +1,11 @@
 import { useState } from 'react'
+import './App.css'
+import useTheme from "./hooks/useTheme";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import RouterPage from "./pages/Routeur";
-import useTheme from "./hooks/useTheme";
-import './App.css'
+import SwitchPage from './pages/Switch';
+import LinuxPage from './pages/Linux';
 
 function App() {
   const [page, setPage] = useState("home");
@@ -27,8 +29,20 @@ function App() {
             theme={theme}
           />
         )}
-        {page === "switch_page" && <h1>🖧 Switch</h1>}
-        {page === "linux_commands_page" && <h1>🐧 Linux</h1>}
+        {page === "switch_page" && (
+          <SwitchPage
+            contrastClass={contrastClass}
+            onToggleTheme={toggleTheme}
+            theme={theme}
+          />
+        )}
+        {page === "linux_commands_page" && (
+          <LinuxPage
+            contrastClass={contrastClass}
+            onToggleTheme={toggleTheme}
+            theme={theme}
+          />
+        )}
         {page === "network_page" && <h1>🌐 Réseaux</h1>}
       </main>
     </>

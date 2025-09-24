@@ -49,7 +49,7 @@ export default function PageWithTocAccordion({
     }, []);
 
     return (
-        <section className="page-section mt-5">
+        <section className="page-section mt-6">
             <div className="container">
                 <div className="row g-4">
                     {/* Sommaire */}
