@@ -1,9 +1,34 @@
 import React, { useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
+import { Tooltip } from "bootstrap";
 
 const BIT_WEIGHTS = [128, 64, 32, 16, 8, 4, 2, 1];
 
+// AND binaire (4 octets x 8 bits)
+function andBits(bitsA, bitsB) {
+    return bitsA.map((octA, i) => octA.map((bit, j) => (bit & bitsB[i][j]) >>> 0));
+}
+
+// comparaison profonde 4x8
+function equalBits(a, b) {
+    if (a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++) {
+        const A = a[i], B = b[i];
+        if (A.length !== B.length) return false;
+        for (let j = 0; j < A.length; j++) if (A[j] !== B[j]) return false;
+    }
+    return true;
+}
+
 /** @typedef {'mask'|'ip'|'network'} RowType */
-/** @typedef {{ id: string, type: RowType, bits: number[][] }} Row */
+/** 
+ * @typedef {{ 
+ *  id: string, 
+ *  type: RowType, 
+ *  bits: number[][],
+ *  dependsOn?: string[] // pour les lignes "network"
+ * }} Row 
+ */
 
 export default function BinaryIPTable() {
     /** @type {Row[]} */
@@ -18,8 +43,22 @@ export default function BinaryIPTable() {
         setRows((prev) => [...prev, newRow]);
     };
 
-    const removeRow = (id) => {
-        setRows(prev => prev.filter(r => r.id !== id));
+    // 🗑️ Suppression avec cascade des "network" dépendants
+    const removeRow = (idToRemove) => {
+        setRows(prev => {
+            // 1) supprime la ligne cible
+            let next = prev.filter(r => r.id !== idToRemove);
+            // 2) supprime les lignes "network" qui dépendent de la cible
+            //    (au cas où plusieurs réseaux auraient été créés)
+            const dependedBy = new Set(
+                next.filter(r => r.type === "network" && r.dependsOn && r.dependsOn.includes(idToRemove))
+                    .map(r => r.id)
+            );
+            if (dependedBy.size > 0) {
+                next = next.filter(r => !dependedBy.has(r.id));
+            }
+            return next;
+        });
     };
 
     function updateBit(rowId, octIdx, bitIdx, val) {
@@ -46,18 +85,113 @@ export default function BinaryIPTable() {
         setRows([]); // supprime toutes les lignes
     };
 
+    // ✅ Condition d’activation du bouton "Adresse réseau"
+    const canAddNetwork = () => {
+        if (rows.length < 2) return false;
+        const a = rows[rows.length - 2];
+        const b = rows[rows.length - 1];
+        const types = new Set([a.type, b.type]);
+        return types.has("mask") && types.has("ip");
+    };
+
+    // ➕ Créer la ligne "network" à partir des 2 dernières
+    const addNetworkFromLastTwo = () => {
+        if (!canAddNetwork()) return;
+        const maskRow = rows[rows.length - 2].type === "mask" ? rows[rows.length - 2] : rows[rows.length - 1];
+        const ipRow = rows[rows.length - 2].type === "ip" ? rows[rows.length - 2] : rows[rows.length - 1];
+
+        const netBits = andBits(maskRow.bits, ipRow.bits);
+        const netRow = {
+            id: crypto.randomUUID(),
+            type: "network",
+            bits: netBits,
+            dependsOn: [maskRow.id, ipRow.id], // 🔗 pour suppression cascade
+        };
+        setRows(prev => [...prev, netRow]);
+    };
+
+    // Recalcule en live toutes les lignes "network"
+    useEffect(() => {
+        // indexation par id pour accès O(1)
+        const byId = new Map(rows.map(r => [r.id, r]));
+
+        // prépare une version potentiellement mise à jour
+        let next = rows;
+        let changed = false;
+
+        for (const r of rows) {
+            if (r.type !== "network" || !r.dependsOn || r.dependsOn.length !== 2) continue;
+
+            const [maskId, ipId] = r.dependsOn;
+            const mask = byId.get(maskId);
+            const ip = byId.get(ipId);
+
+            // si une des dépendances a disparu, on laisse (la suppression en cascade se fait ailleurs)
+            if (!mask || !ip) continue;
+
+            const newBits = andBits(mask.bits, ip.bits);
+            if (!equalBits(r.bits, newBits)) {
+                // copie paresseuse du tableau (une seule fois si nécessaire)
+                if (!changed) next = rows.map(x => ({ ...x }));
+                const idx = next.findIndex(x => x.id === r.id);
+                next[idx] = { ...next[idx], bits: newBits };
+                changed = true;
+            }
+        }
+
+        if (changed) setRows(next);
+    }, [rows, setRows]);
+
+    const toolbarRef = useRef(null);
+
+    // booléen mémoïsé pour déclencher l’init quand l’état change
+    const canAddNet = useMemo(() => canAddNetwork(), [rows]); // ou autres deps utiles
+
+    useEffect(() => {
+        const root = toolbarRef.current;
+        if (!root) return;
+
+        // initialiser tous les [data-bs-toggle="tooltip"] du toolbar
+        const triggers = root.querySelectorAll('[data-bs-toggle="tooltip"]');
+        const instances = [...triggers].map(
+            (el) => new Tooltip(el, { container: "body", trigger: "hover focus" })
+        );
+
+        // nettoyage pour éviter les doublons au hot-reload / re-render
+        return () => instances.forEach((i) => i.dispose());
+    }, [canAddNet]); // ← réinit à chaque changement d’activation
+
     return (
         <div>
-            <div className="mb-3">
+            <div className="mb-3" ref={toolbarRef}>
                 <button className="btn btn-primary me-2" onClick={() => addRow("mask")}>
                     ➕ Masque
                 </button>
                 <button className="btn btn-success me-2" onClick={() => addRow("ip")}>
                     ➕ Adresse IP
                 </button>
-                <button className="btn btn-warning me-2" onClick={() => addRow("network")}>
-                    ➕ Adresse réseau
-                </button>
+                {canAddNet ? (
+                    <button className="btn btn-warning me-2" onClick={addNetworkFromLastTwo}>
+                        ➕ Adresse réseau
+                    </button>
+                ) : (
+                    // Tooltip sur le SPAN (focusable), bouton vraiment disabled
+                    <span
+                        className="d-inline-block"
+                        tabIndex={0}
+                        data-bs-toggle="tooltip"
+                        data-bs-title="Les deux dernières lignes doivent être un masque et une adresse IP"
+                    >
+                        <button
+                            type="button"
+                            className="btn btn-warning me-2"
+                            disabled
+                            style={{ pointerEvents: "none" }} // laisse le span recevoir le hover/focus
+                        >
+                            ➕ Adresse réseau
+                        </button>
+                    </span>
+                )}
                 <button className="btn btn-danger" onClick={resetTable}>
                     ♻️ Réinitialiser
                 </button>
@@ -150,7 +284,7 @@ export default function BinaryIPTable() {
                                         <td>{bitsToValue(octet)}</td>
                                     </React.Fragment>
                                 ))}
-                                <td className="text-nowrap">{rowToIP(row)}</td>
+                                <td className="text-nowrap complete-ip">{rowToIP(row)}</td>
 
                                 {/* Bouton supprimer ligne */}
                                 <td className="actions-cell text-end align-middle">

@@ -242,3 +242,8 @@ pre.terminal .output {
 .ip-table .table-warning td {
     --bs-table-bg: #ffe38a !important;
 }
+
+.complete-ip {
+    text-align: left;
+    padding-left: 20px;
+}
