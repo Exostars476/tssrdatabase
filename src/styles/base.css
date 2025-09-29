@@ -114,14 +114,16 @@ pre::before {
 
 /* Boutons flottants : bas-droite, au-dessus du contenu */
 .floating-controls {
-  position: fixed;
-  right: 1rem;
-  bottom: 1rem;
-  z-index: 1050;            /* au-dessus des cartes/accordions */
-  backdrop-filter: blur(6px);
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 1050;
+    /* au-dessus des cartes/accordions */
+    backdrop-filter: blur(6px);
 }
+
 .floating-controls .btn {
-  border-width: 1px;
+    border-width: 1px;
 }
 
 code.language-bash {
@@ -176,63 +178,90 @@ pre.terminal .output {
 }
 
 .table-responsive {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .bit-input {
-  width: 2.2ch;         /* largeur suffisante pour un chiffre */
-  text-align: center;   /* centre le 0 ou 1 */
-  padding: 0;
+    width: 2.2ch;
+    /* largeur suffisante pour un chiffre */
+    text-align: center;
+    /* centre le 0 ou 1 */
+    padding: 0;
 }
 
 /* Cacher les flèches des input ManualNetworking */
 .bit-input::-webkit-outer-spin-button,
 .bit-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
+    -webkit-appearance: none;
+    margin: 0;
 }
+
 /* Retirer les flèches sur Firefox */
 .bit-input[type="number"] {
-  appearance: textfield;
+    appearance: textfield;
 }
 
 /* Cellule "actions" invisible dans un tableau .table-bordered */
 .actions-cell {
-  background: transparent !important;
-  border: none !important;
-  padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
 }
+
 .actions-cell-header {
-  background: transparent !important;
-  border: none !important;
-  padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
 }
 
 /* petit bouton à droite, verticalement centré */
 .actions-cell .btn {
-  margin-right: .5rem;  /* espace du bord droit */
+    margin-right: .5rem;
+    /* espace du bord droit */
 }
 
 /* Bordures cellule par cellule, sombre */
-.ip-table.table-bordered > :not(caption) > * > * {
-  border: 1px solid #222;
+.ip-table.table-bordered> :not(caption)>*>* {
+    border: 1px solid #222;
 }
 
 /* Supprimer TOUTE bordure sur la colonne Actions */
 .ip-table td.actions-cell,
 .ip-table th.actions-cell-header {
-  border: none !important;          /* pas de bordure */
-  background: transparent !important;
+    border: none !important;
+    /* pas de bordure */
+    background: transparent !important;
 }
 
 /* Supprimer la bordure droite de la ligne quand il y a une cellule Actions */
 .ip-table tr {
-  border: none !important;    /* enlève la bordure verticale */
+    border: none !important;
+    /* enlève la bordure verticale */
 }
 
 .ip-table .table-primary td {
     --bs-table-bg: #89b8ff !important;
+}
+
+/* Ombres de fond uniquement pour les cellules de BITS des lignes masque */
+.ip-table tr.mask-row td.mask-bit.network-cell {
+    /* partie réseau = bits à 1 (jusqu'au dernier 1) */
+    background-color: #5a96ef !important;
+    /* plus foncé que #89b8ff */
+}
+
+.ip-table tr.mask-row td.mask-bit.host-cell {
+    /* partie hôte = après le dernier 1 */
+    background-color: #89b8ff !important;
+    /* plus clair que #89b8ff */
+}
+
+/* Masque invalide : bordures rouges sur toute la ligne (sans épaissir) */
+.ip-table tr.invalid-mask>td {
+    border: 2px solid;
+    border-color: #dc3545 !important;
+    /* rouge bootstrap */
 }
 
 .ip-table .table-success td {

@@ -215,92 +215,128 @@ export default function BinaryIPTable() {
                     </thead>
 
                     <tbody>
-                        {rows.map((row) => (
-                            <tr
-                                key={row.id}
-                                className={
-                                    row.type === "mask"
-                                        ? "table-primary position-relative"
-                                        : row.type === "ip"
-                                            ? "table-success position-relative"
-                                            : "table-warning position-relative"
-                                }
-                            >
-                                {row.bits.map((octet, octIdx) => (
-                                    <React.Fragment key={octIdx}>
-                                        {octet.map((bit, bitIdx) => (
-                                            <td key={bitIdx}>
-                                                {row.type === "network" ? (
-                                                    bit
-                                                ) : (
-                                                    <input
-                                                        className="bit-input"
-                                                        type="text"
-                                                        inputMode="numeric"   // clavier numérique sur mobile
-                                                        maxLength={1}         // un seul caractère
-                                                        value={String(bit)}   // force l'affichage "0" ou "1"
-                                                        onFocus={(e) => e.target.select()}  // sélectionne automatiquement au focus
-                                                        onChange={(e) => {
-                                                            // garde-fou (coller/saisie IME) : ne prendre que 0/1, sinon 0
-                                                            const c = e.target.value;
-                                                            updateBit(row.id, octIdx, bitIdx, c === "1" ? 1 : 0);
-                                                        }}
-                                                        onKeyDown={(e) => {
-                                                            // touches de navigation autorisées
-                                                            const nav = [
-                                                                "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown",
-                                                                "Tab", "Home", "End", "Shift", "Control", "Alt", "Meta"
-                                                            ];
-                                                            if (nav.includes(e.key)) return;
+                        {rows.map((row) => {
+                            // --- calcul spécial pour les lignes "mask" ---
+                            let isMaskValid = true;
+                            let lastOneIndex = -1;
 
-                                                            // Backspace/Delete -> force 0
-                                                            if (e.key === "Backspace" || e.key === "Delete") {
-                                                                e.preventDefault();
-                                                                updateBit(row.id, octIdx, bitIdx, 0);
-                                                                // re-sélectionner le contenu pour la prochaine saisie
-                                                                requestAnimationFrame(() => e.currentTarget.select());
-                                                                return;
-                                                            }
+                            if (row.type === "mask") {
+                                const flatBits = row.bits.flat(); // 32 bits à la suite
+                                let seenZero = false;
+                                flatBits.forEach((b, idx) => {
+                                    if (b === 1) {
+                                        if (seenZero) isMaskValid = false; // 1 après 0 => invalide
+                                        lastOneIndex = idx;
+                                    } else {
+                                        seenZero = true;
+                                    }
+                                });
+                            }
 
-                                                            // autoriser seulement 0 ou 1, et remplacer complètement la valeur
-                                                            if (e.key === "0" || e.key === "1") {
-                                                                e.preventDefault();
-                                                                updateBit(row.id, octIdx, bitIdx, Number(e.key));
-                                                                requestAnimationFrame(() => e.currentTarget.select());
-                                                                return;
-                                                            }
+                            const rowClass =
+                                row.type === "mask"
+                                    ? `${isMaskValid ? "table-primary" : "table-primary invalid-mask"} mask-row position-relative`
+                                    : row.type === "ip"
+                                        ? "table-success position-relative"
+                                        : "table-warning position-relative";
 
-                                                            // toute autre touche "imprimable" est bloquée
-                                                            if (e.key.length === 1) {
-                                                                e.preventDefault();
-                                                            }
-                                                        }}
-                                                        onPaste={(e) => e.preventDefault()} // pas de collage libre
-                                                        aria-label={`Bit ${bitIdx + 1} de l’octet ${octIdx + 1}`}
-                                                    />
-                                                )}
+                            return (
+                                <tr key={row.id} className={rowClass}>
+                                    {row.bits.map((octet, octIdx) => (
+                                        <React.Fragment key={octIdx}>
+                                            {octet.map((bit, bitIdx) => {
+                                                // index absolu du bit dans les 32 bits
+                                                const bitIndex = octIdx * 8 + bitIdx;
+
+                                                // classes de shading uniquement pour les lignes "mask"
+                                                const maskShadeClass =
+                                                    row.type === "mask"
+                                                        ? `mask-bit ${bitIndex <= lastOneIndex ? "network-cell" : "host-cell"}`
+                                                        : "";
+
+                                                return (
+                                                    <td key={bitIdx} className={maskShadeClass}>
+                                                        {row.type === "network" ? (
+                                                            bit
+                                                        ) : (
+                                                            <input
+                                                                className="bit-input"
+                                                                type="text"
+                                                                inputMode="numeric"
+                                                                maxLength={1}
+                                                                value={String(bit)}
+                                                                onFocus={(e) => e.target.select()}
+                                                                onChange={(e) => {
+                                                                    const c = e.target.value;
+                                                                    updateBit(row.id, octIdx, bitIdx, c === "1" ? 1 : 0);
+                                                                }}
+                                                                onKeyDown={(e) => {
+                                                                    const nav = [
+                                                                        "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown",
+                                                                        "Tab", "Home", "End", "Shift", "Control", "Alt", "Meta"
+                                                                    ];
+                                                                    if (nav.includes(e.key)) return;
+
+                                                                    if (e.key === "Backspace" || e.key === "Delete") {
+                                                                        e.preventDefault();
+                                                                        updateBit(row.id, octIdx, bitIdx, 0);
+                                                                        requestAnimationFrame(() => e.currentTarget.select());
+                                                                        return;
+                                                                    }
+
+                                                                    if (e.key === "0" || e.key === "1") {
+                                                                        e.preventDefault();
+                                                                        updateBit(row.id, octIdx, bitIdx, Number(e.key));
+                                                                        requestAnimationFrame(() => e.currentTarget.select());
+                                                                        return;
+                                                                    }
+
+                                                                    if (e.key.length === 1) e.preventDefault();
+                                                                }}
+                                                                onPaste={(e) => e.preventDefault()}
+                                                                aria-label={`Bit ${bitIdx + 1} de l’octet ${octIdx + 1}`}
+                                                            />
+                                                        )}
+                                                    </td>
+                                                );
+                                            })}
+                                            {/* colonne 'Valeur' -> conserve le fond #89b8ff (pas de shading) */}
+                                            <td
+                                                className={
+                                                    row.type === "mask"
+                                                        ? bitsToValue(octet) === 255
+                                                            ? "mask-bit network-cell"
+                                                            : bitsToValue(octet) === 0
+                                                                ? "host-cell"
+                                                                : ""
+                                                        : ""
+                                                }
+                                            >
+                                                {bitsToValue(octet)}
                                             </td>
-                                        ))}
-                                        <td>{bitsToValue(octet)}</td>
-                                    </React.Fragment>
-                                ))}
-                                <td className="text-nowrap complete-ip">{rowToIP(row)}</td>
+                                        </React.Fragment>
+                                    ))}
 
-                                {/* Bouton supprimer ligne */}
-                                <td className="actions-cell text-end align-middle">
-                                    <button
-                                        type="button"
-                                        className="btn btn-sm btn-danger"
-                                        onClick={() => removeRow(row.id)}
-                                        title="Supprimer cette ligne"
-                                        aria-label="Supprimer cette ligne"
-                                    >
-                                        <i className="bi bi-x-lg" />
-                                        X
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
+                                    {/* IP complète */}
+                                    <td className="text-nowrap complete-ip">{rowToIP(row)}</td>
+
+                                    {/* Bouton supprimer ligne (cellule sans bordure si tu as gardé la règle .actions-cell) */}
+                                    <td className="actions-cell text-end align-middle">
+                                        <button
+                                            type="button"
+                                            className="btn btn-sm btn-danger"
+                                            onClick={() => removeRow(row.id)}
+                                            title="Supprimer cette ligne"
+                                            aria-label="Supprimer cette ligne"
+                                        >
+                                            <i className="bi bi-x-lg" />
+                                            X
+                                        </button>
+                                    </td>
+                                </tr>
+                            );
+                        })}
+
                         {rows.length === 0 && (
                             <tr>
                                 <td colSpan={4 * 9 + 1} className="text-muted text-center py-4">
