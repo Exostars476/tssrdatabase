@@ -81,8 +81,9 @@ export default function Home({ onNavigate }) {
                             <div className="card-body">
                                 <h5 className="card-title">🌐 Calculateur de réseaux</h5>
                                 <p className="card-text">
-                                    Outil complet pour obtenir les informations réseaux à partir
-                                    d'une adresse IP et planifier des sous-réseaux.
+                                    Calculateur d'adresses IP et réseaux. Plannificateur de sous-réseaux.
+                                    <br/>
+                                    Tableau de calcul d'adresses IP et réseaux manuel.
                                 </p>
                                 <button
                                     className="btn btn-primary"
