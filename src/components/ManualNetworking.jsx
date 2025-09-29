@@ -18,10 +18,9 @@ export default function BinaryIPTable() {
         setRows((prev) => [...prev, newRow]);
     };
 
-    const bitsToValue = (bits /* number[] */) =>
-        bits.reduce((sum, bit, idx) => sum + bit * BIT_WEIGHTS[idx], 0);
-
-    const rowToIP = (row /* Row */) => row.bits.map(bitsToValue).join(".");
+    const removeRow = (id) => {
+        setRows(prev => prev.filter(r => r.id !== id));
+    };
 
     function updateBit(rowId, octIdx, bitIdx, val) {
         setRows(prev =>
@@ -38,6 +37,10 @@ export default function BinaryIPTable() {
         );
     }
 
+    const bitsToValue = (bits /* number[] */) =>
+        bits.reduce((sum, bit, idx) => sum + bit * BIT_WEIGHTS[idx], 0);
+
+    const rowToIP = (row /* Row */) => row.bits.map(bitsToValue).join(".");
 
     return (
         <div>
@@ -53,8 +56,8 @@ export default function BinaryIPTable() {
                 </button>
             </div>
 
-            <div className="table-wrapper">
-                <table className="table table-bordered text-center align-middle">
+            <div className="table-responsive">
+                <table className="table table-bordered text-center align-middle ip-table">
                     <thead className="table-dark">
                         <tr>
                             {Array.from({ length: 4 }).map((_, blockIdx) => (
@@ -62,10 +65,11 @@ export default function BinaryIPTable() {
                                     {BIT_WEIGHTS.map((w) => (
                                         <th key={`${blockIdx}-${w}`}>{w}</th>
                                     ))}
-                                    <th></th>
+                                    <th width={"46px"}></th>
                                 </React.Fragment>
                             ))}
-                            <th>Adresse</th>
+                            <th className="text-nowrap" width="140px">Adresse</th>
+                            <th className="actions-cell-header" style={{ width: "3rem" }} />
                         </tr>
                     </thead>
 
@@ -74,8 +78,11 @@ export default function BinaryIPTable() {
                             <tr
                                 key={row.id}
                                 className={
-                                    row.type === "mask" ? "table-primary" :
-                                        row.type === "ip" ? "table-success" : "table-warning"
+                                    row.type === "mask"
+                                        ? "table-primary position-relative"
+                                        : row.type === "ip"
+                                            ? "table-success position-relative"
+                                            : "table-warning position-relative"
                                 }
                             >
                                 {row.bits.map((octet, octIdx) => (
@@ -130,16 +137,36 @@ export default function BinaryIPTable() {
                                                         onPaste={(e) => e.preventDefault()} // pas de collage libre
                                                         aria-label={`Bit ${bitIdx + 1} de l’octet ${octIdx + 1}`}
                                                     />
-
                                                 )}
                                             </td>
                                         ))}
                                         <td>{bitsToValue(octet)}</td>
                                     </React.Fragment>
                                 ))}
-                                <td>{rowToIP(row)}</td>
+                                <td className="text-nowrap">{rowToIP(row)}</td>
+
+                                {/* Bouton supprimer ligne */}
+                                <td className="actions-cell text-end align-middle">
+                                    <button
+                                        type="button"
+                                        className="btn btn-sm btn-danger"
+                                        onClick={() => removeRow(row.id)}
+                                        title="Supprimer cette ligne"
+                                        aria-label="Supprimer cette ligne"
+                                    >
+                                        <i className="bi bi-x-lg" />
+                                        X
+                                    </button>
+                                </td>
                             </tr>
                         ))}
+                        {rows.length === 0 && (
+                            <tr>
+                                <td colSpan={4 * 9 + 1} className="text-muted text-center py-4">
+                                    Ajoutez une ligne “Masque”, “Adresse IP” ou “Adresse réseau” pour commencer.
+                                </td>
+                            </tr>
+                        )}
                     </tbody>
                 </table>
             </div>

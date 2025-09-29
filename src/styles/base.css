@@ -175,7 +175,7 @@ pre.terminal .output {
     /* presque noir */
 }
 
-.table-wrapper {
+.table-responsive {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
@@ -195,4 +195,50 @@ pre.terminal .output {
 /* Retirer les flèches sur Firefox */
 .bit-input[type="number"] {
   appearance: textfield;
+}
+
+/* Cellule "actions" invisible dans un tableau .table-bordered */
+.actions-cell {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+}
+.actions-cell-header {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+}
+
+/* petit bouton à droite, verticalement centré */
+.actions-cell .btn {
+  margin-right: .5rem;  /* espace du bord droit */
+}
+
+/* Bordures cellule par cellule, sombre */
+.ip-table.table-bordered > :not(caption) > * > * {
+  border: 1px solid #222;
+}
+
+/* Supprimer TOUTE bordure sur la colonne Actions */
+.ip-table td.actions-cell,
+.ip-table th.actions-cell-header {
+  border: none !important;          /* pas de bordure */
+  background: transparent !important;
+}
+
+/* Supprimer la bordure droite de la ligne quand il y a une cellule Actions */
+.ip-table tr {
+  border: none !important;    /* enlève la bordure verticale */
+}
+
+.ip-table .table-primary td {
+    --bs-table-bg: #89b8ff !important;
+}
+
+.ip-table .table-success td {
+    --bs-table-bg: #89ffca !important;
+}
+
+.ip-table .table-warning td {
+    --bs-table-bg: #ffe38a !important;
 }
