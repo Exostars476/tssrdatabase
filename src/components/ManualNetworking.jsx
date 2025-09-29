@@ -42,17 +42,24 @@ export default function BinaryIPTable() {
 
     const rowToIP = (row /* Row */) => row.bits.map(bitsToValue).join(".");
 
+    const resetTable = () => {
+        setRows([]); // supprime toutes les lignes
+    };
+
     return (
         <div>
             <div className="mb-3">
-                <button className="btn btn-outline-primary me-2" onClick={() => addRow("mask")}>
+                <button className="btn btn-primary me-2" onClick={() => addRow("mask")}>
                     ➕ Masque
                 </button>
-                <button className="btn btn-outline-success me-2" onClick={() => addRow("ip")}>
+                <button className="btn btn-success me-2" onClick={() => addRow("ip")}>
                     ➕ Adresse IP
                 </button>
-                <button className="btn btn-outline-warning" onClick={() => addRow("network")}>
+                <button className="btn btn-warning me-2" onClick={() => addRow("network")}>
                     ➕ Adresse réseau
+                </button>
+                <button className="btn btn-danger" onClick={resetTable}>
+                    ♻️ Réinitialiser
                 </button>
             </div>
 
