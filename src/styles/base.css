@@ -174,3 +174,25 @@ pre.terminal .output {
     color: #111827;
     /* presque noir */
 }
+
+.table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.bit-input {
+  width: 2.2ch;         /* largeur suffisante pour un chiffre */
+  text-align: center;   /* centre le 0 ou 1 */
+  padding: 0;
+}
+
+/* Cacher les flèches des input ManualNetworking */
+.bit-input::-webkit-outer-spin-button,
+.bit-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+/* Retirer les flèches sur Firefox */
+.bit-input[type="number"] {
+  appearance: textfield;
+}

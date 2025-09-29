@@ -1,4 +1,5 @@
 import { useState } from "react";
+import ManualNetworking from "../components/ManualNetworking";
 
 // ===== Helpers IP =====
 function ipToInt(ip) {
@@ -63,7 +64,9 @@ function alignToBlock(addr, blockSize) {
 }
 
 export default function NetworkPage() {
+    const [mode, setMode] = useState("calculateur"); // "calculateur" ou "manuel"
 
+    // ============== CALCULATEUR ============== //
     // Form principal
     const [ip, setIp] = useState("");
     const [maskInput, setMaskInput] = useState("");
@@ -239,195 +242,221 @@ export default function NetworkPage() {
 
     return (
         <section id="network_page" className="page-section">
-            <div className="container mt-6">
-                <h1 className="h3 mb-4">📡 Calculateur d’adresses IP</h1>
-
-                {/* Formulaire principal */}
-                <div className="card mb-4">
-                    <div className="card-body">
-                        <form onSubmit={onSubmit}>
-                            <div className="row g-3">
-                                <div className="col-md-6">
-                                    <label htmlFor="ipAddress" className="form-label">
-                                        Adresse IP
-                                    </label>
-                                    <input
-                                        type="text"
-                                        id="ipAddress"
-                                        className="form-control"
-                                        placeholder="192.168.1.10"
-                                        value={ip}
-                                        onChange={(e) => setIp(e.target.value)}
-                                    />
-                                </div>
-                                <div className="col-md-6">
-                                    <label className="form-label d-flex justify-content-between" htmlFor="subnetMask">
-                                        <span>Masque de sous-réseau</span>
-                                        <button
-                                            type="button"
-                                            className="btn btn-sm btn-outline-secondary py-0"
-                                            onClick={toggleMaskMode}
-                                            aria-label="Basculer mode masque"
-                                            title="Basculer CIDR / Classique"
-                                        >
-                                            {maskMode === "classic" ? "CIDR" : "Classique"}
-                                        </button>
-                                    </label>
-                                    <input
-                                        type="text"
-                                        id="subnetMask"
-                                        className="form-control"
-                                        placeholder={maskPlaceholder}
-                                        value={maskInput}
-                                        onChange={(e) => setMaskInput(e.target.value)}
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="mt-3 row gy-2 gx-3 justify-content-between px-1">
-                                <div className="col-auto">
-                                    <button type="submit" className="btn btn-primary btn-network">
-                                        Calculer
-                                    </button>
-                                </div>
-                                <div className="col-auto">
-                                    <button type="button" className="btn btn-outline-secondary btn-network" onClick={resetAll}>
-                                        Réinitialiser
-                                    </button>
-                                </div>
-                            </div>
-                        </form>
+            <div className="container-fluid mt-6">
+                {/* Toggle Calculateur / Manuel */}
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                    <h1 className="h3 mb-0">🌐 Outils Réseau</h1>
+                    <div className="btn-group">
+                        <button
+                            className={`btn btn-sm ${mode === "calculateur" ? "btn-primary" : "btn-outline-primary"}`}
+                            onClick={() => setMode("calculateur")}
+                        >
+                            Calculateur
+                        </button>
+                        <button
+                            className={`btn btn-sm ${mode === "manuel" ? "btn-primary" : "btn-outline-primary"}`}
+                            onClick={() => setMode("manuel")}
+                        >
+                            Manuel
+                        </button>
                     </div>
                 </div>
 
-                {/* Résultats */}
-                {results && (
-                    <div className="card">
-                        <div className="card-body">
-                            <h5 className="card-title">Résultats</h5>
-                            <p>
-                                <strong>Adresse réseau :</strong> <span>{results.network}</span>
-                            </p>
-                            <p>
-                                <strong>Première adresse hôte :</strong> <span>{results.firstHost}</span>
-                            </p>
-                            <p>
-                                <strong>Dernière adresse hôte :</strong> <span>{results.lastHost}</span>
-                            </p>
-                            <p>
-                                <strong>Adresse de broadcast :</strong> <span>{results.broadcast}</span>
-                            </p>
-                            <p>
-                                <strong>Nombre d’hôtes disponibles :</strong> <span>{results.numberOfHosts}</span>
-                            </p>
-                        </div>
-                    </div>
-                )}
-
-                {/* Planificateur VLSM */}
-                {showPlanner && (
-                    <div className="card mt-4">
-                        <div className="card-body">
-                            <div className="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-3">
-                                <h5 className="card-title mb-0">Planification de sous-réseaux (VLSM)</h5>
-                                <div className="d-flex flex-wrap gap-2">
-                                    <button
-                                        className="btn btn-outline-secondary btn-sm"
-                                        type="button"
-                                        onClick={() => addSubnetRow()}
-                                    >
-                                        Ajouter un sous-réseau
-                                    </button>
-                                    <button className="btn btn-primary btn-sm" type="button" onClick={generatePlan}>
-                                        Générer le plan
-                                    </button>
-                                </div>
-                            </div>
-
-                            {/* Liste de sous-réseaux à saisir */}
-                            <div className="vstack gap-2" id="subnetList">
-                                {subnets.map((row) => (
-                                    <div className="row g-2 align-items-end" key={row.id}>
+                {/* Affichage conditionnel global par TERNAIRE */}
+                {mode === "calculateur" ? (
+                    <>
+                        <div className="card mb-4">
+                            <div className="card-body">
+                                <form onSubmit={onSubmit}>
+                                    <div className="row g-3">
                                         <div className="col-md-6">
-                                            <label className="form-label">Nom du sous-réseau</label>
+                                            <label htmlFor="ipAddress" className="form-label">
+                                                Adresse IP
+                                            </label>
                                             <input
                                                 type="text"
+                                                id="ipAddress"
                                                 className="form-control"
-                                                placeholder="Ex: Réseau A"
-                                                value={row.name}
-                                                onChange={(e) => updateSubnet(row.id, { name: e.target.value })}
+                                                placeholder="192.168.1.10"
+                                                value={ip}
+                                                onChange={(e) => setIp(e.target.value)}
                                             />
                                         </div>
-                                        <div className="col-md-4">
-                                            <label className="form-label">Nombre de machines</label>
+                                        <div className="col-md-6">
+                                            <label className="form-label d-flex justify-content-between" htmlFor="subnetMask">
+                                                <span>Masque de sous-réseau</span>
+                                                <button
+                                                    type="button"
+                                                    className="btn btn-sm btn-outline-secondary py-0"
+                                                    onClick={toggleMaskMode}
+                                                    aria-label="Basculer mode masque"
+                                                    title="Basculer CIDR / Classique"
+                                                >
+                                                    {maskMode === "classic" ? "CIDR" : "Classique"}
+                                                </button>
+                                            </label>
                                             <input
-                                                type="number"
+                                                type="text"
+                                                id="subnetMask"
                                                 className="form-control"
-                                                min={1}
-                                                step={1}
-                                                placeholder="Ex: 42"
-                                                value={row.hosts}
-                                                onChange={(e) => updateSubnet(row.id, { hosts: e.target.value })}
+                                                placeholder={maskPlaceholder}
+                                                value={maskInput}
+                                                onChange={(e) => setMaskInput(e.target.value)}
                                             />
                                         </div>
-                                        <div className="col-md-2 d-grid">
-                                            <button
-                                                type="button"
-                                                className="btn btn-outline-danger"
-                                                onClick={() => removeSubnetRow(row.id)}
-                                            >
-                                                Supprimer
+                                    </div>
+
+                                    <div className="mt-3 row gy-2 gx-3 justify-content-between px-1">
+                                        <div className="col-auto">
+                                            <button type="submit" className="btn btn-primary btn-network">
+                                                Calculer
+                                            </button>
+                                        </div>
+                                        <div className="col-auto">
+                                            <button type="button" className="btn btn-outline-secondary btn-network" onClick={resetAll}>
+                                                Réinitialiser
                                             </button>
                                         </div>
                                     </div>
-                                ))}
-                                {subnets.length === 0 && (
-                                    <div className="text-muted small">Ajoutez des sous-réseaux puis cliquez sur “Générer le plan”.</div>
-                                )}
+                                </form>
                             </div>
-
-                            {/* Alerte */}
-                            {planAlert && (
-                                <div id="subnetAlert" className="alert alert-danger mt-3" role="alert">
-                                    {planAlert}
-                                </div>
-                            )}
-
-                            {/* Tableau du plan */}
-                            {planRows.length > 0 && (
-                                <div className="mt-3">
-                                    <div className="table-responsive">
-                                        <table className="table table-striped table-bordered align-middle">
-                                            <thead>
-                                                <tr>
-                                                    <th>Nom</th>
-                                                    <th>Adresse réseau</th>
-                                                    <th>Masque</th>
-                                                    <th>CIDR</th>
-                                                    <th>Broadcast</th>
-                                                    <th>Plage IP</th>
-                                                    <th>Hôtes</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {planRows.map((r, i) => (
-                                                    <tr key={i}>
-                                                        <td>{r.name}</td>
-                                                        <td><code>{r.network}</code></td>
-                                                        <td><code>{r.mask}</code></td>
-                                                        <td><code>{r.cidr}</code></td>
-                                                        <td><code>{r.broadcast}</code></td>
-                                                        <td>{r.range !== "—" ? <code>{r.range}</code> : "—"}</td>
-                                                        <td>{r.hostsMax}</td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            )}
                         </div>
-                    </div>
+                        
+                        {/* Résultats */}
+                        {results && (
+                            <div className="card">
+                                <div className="card-body">
+                                    <h5 className="card-title">Résultats</h5>
+                                    <p>
+                                        <strong>Adresse réseau :</strong> <span>{results.network}</span>
+                                    </p>
+                                    <p>
+                                        <strong>Première adresse hôte :</strong> <span>{results.firstHost}</span>
+                                    </p>
+                                    <p>
+                                        <strong>Dernière adresse hôte :</strong> <span>{results.lastHost}</span>
+                                    </p>
+                                    <p>
+                                        <strong>Adresse de broadcast :</strong> <span>{results.broadcast}</span>
+                                    </p>
+                                    <p>
+                                        <strong>Nombre d’hôtes disponibles :</strong> <span>{results.numberOfHosts}</span>
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Planificateur VLSM */}
+                        {showPlanner && (
+                            <div className="card mt-4">
+                                <div className="card-body">
+                                    <div className="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-3">
+                                        <h5 className="card-title mb-0">Planification de sous-réseaux (VLSM)</h5>
+                                        <div className="d-flex flex-wrap gap-2">
+                                            <button
+                                                className="btn btn-outline-secondary btn-sm"
+                                                type="button"
+                                                onClick={() => addSubnetRow()}
+                                            >
+                                                Ajouter un sous-réseau
+                                            </button>
+                                            <button className="btn btn-primary btn-sm" type="button" onClick={generatePlan}>
+                                                Générer le plan
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {/* Liste de sous-réseaux à saisir */}
+                                    <div className="vstack gap-2" id="subnetList">
+                                        {subnets.map((row) => (
+                                            <div className="row g-2 align-items-end" key={row.id}>
+                                                <div className="col-md-6">
+                                                    <label className="form-label">Nom du sous-réseau</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        placeholder="Ex: Réseau A"
+                                                        value={row.name}
+                                                        onChange={(e) => updateSubnet(row.id, { name: e.target.value })}
+                                                    />
+                                                </div>
+                                                <div className="col-md-4">
+                                                    <label className="form-label">Nombre de machines</label>
+                                                    <input
+                                                        type="number"
+                                                        className="form-control"
+                                                        min={1}
+                                                        step={1}
+                                                        placeholder="Ex: 42"
+                                                        value={row.hosts}
+                                                        onChange={(e) => updateSubnet(row.id, { hosts: e.target.value })}
+                                                    />
+                                                </div>
+                                                <div className="col-md-2 d-grid">
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-outline-danger"
+                                                        onClick={() => removeSubnetRow(row.id)}
+                                                    >
+                                                        Supprimer
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                        {subnets.length === 0 && (
+                                            <div className="text-muted small">Ajoutez des sous-réseaux puis cliquez sur “Générer le plan”.</div>
+                                        )}
+                                    </div>
+
+                                    {/* Alerte */}
+                                    {planAlert && (
+                                        <div id="subnetAlert" className="alert alert-danger mt-3" role="alert">
+                                            {planAlert}
+                                        </div>
+                                    )}
+
+                                    {/* Tableau du plan */}
+                                    {planRows.length > 0 && (
+                                        <div className="mt-3">
+                                            <div className="table-responsive">
+                                                <table className="table table-striped table-bordered align-middle">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Nom</th>
+                                                            <th>Adresse réseau</th>
+                                                            <th>Masque</th>
+                                                            <th>CIDR</th>
+                                                            <th>Broadcast</th>
+                                                            <th>Plage IP</th>
+                                                            <th>Hôtes</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {planRows.map((r, i) => (
+                                                            <tr key={i}>
+                                                                <td>{r.name}</td>
+                                                                <td><code>{r.network}</code></td>
+                                                                <td><code>{r.mask}</code></td>
+                                                                <td><code>{r.cidr}</code></td>
+                                                                <td><code>{r.broadcast}</code></td>
+                                                                <td>{r.range !== "—" ? <code>{r.range}</code> : "—"}</td>
+                                                                <td>{r.hostsMax}</td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                    </>
+                ) : (                    
+                    <>
+                        {/* Mode manuel */}
+                        <ManualNetworking />
+                    </>  
                 )}
             </div>
         </section>
