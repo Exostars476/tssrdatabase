@@ -29,10 +29,6 @@ jobs:
       - name: Build
         run: npm run build
 
-      # Fallback SPA pour React Router (facultatif mais recommandé)
-      - name: Copy 404.html
-        run: cp dist/index.html dist/404.html
-
       # Déploiement du dossier dist/ vers la branche gh-pages
       - name: Deploy to gh-pages
         uses: JamesIves/github-pages-deploy-action@v4
