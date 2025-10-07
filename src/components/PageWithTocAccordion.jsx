@@ -1,5 +1,5 @@
 // src/components/PageWithTocAccordion.jsx
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Collapse } from "bootstrap";
 
 export default function PageWithTocAccordion({
@@ -16,6 +16,7 @@ export default function PageWithTocAccordion({
     floatingClassName = "floating-controls btn-group",
 }) {
     const accRef = useRef(null);
+    const [openIds, setOpenIds] = useState(() => new Set()); // ids ouverts
 
     // IDs uniques stables pour targets Bootstrap
     const computed = useMemo(() => {
@@ -51,10 +52,38 @@ export default function PageWithTocAccordion({
     const toggleOne = (collapseId) => {
         const el = document.getElementById(collapseId);
         if (!el) return;
-        // crée/récupère l'instance et toggle
-        const inst = Collapse.getOrCreateInstance(el, { toggle: false });
-        inst.toggle();
+        Collapse.getOrCreateInstance(el, { toggle: false }).toggle();
     };
+
+    // écoute les événements Bootstrap pour tenir openIds à jour
+    useEffect(() => {
+        const root = accRef.current;
+        if (!root) return;
+
+        const onShow = (e) => {
+            const id = e.target.id;
+            setOpenIds(prev => {
+                const next = new Set(prev);
+                next.add(id);
+                return next;
+            });
+        };
+        const onHide = (e) => {
+            const id = e.target.id;
+            setOpenIds(prev => {
+                const next = new Set(prev);
+                next.delete(id);
+                return next;
+            });
+        };
+
+        root.addEventListener("show.bs.collapse", onShow);
+        root.addEventListener("hide.bs.collapse", onHide);
+        return () => {
+            root.removeEventListener("show.bs.collapse", onShow);
+            root.removeEventListener("hide.bs.collapse", onHide);
+        };
+    }, []);
 
     return (
         <section className="page-section mt-6">
@@ -99,29 +128,32 @@ export default function PageWithTocAccordion({
                         </header>
 
                         <div className="accordion" id={accordionId} ref={accRef}>
-                            {computed.map((it) => (
-                                <div className="accordion-item" key={it.id}>
-                                    <h2 className="accordion-header" id={it.headingId}>
-                                        <button
-                                            className="accordion-button collapsed"
-                                            type="button"
-                                            onClick={() => toggleOne(it.collapseId)}
-                                            aria-expanded="false"
-                                            aria-controls={it.collapseId}
+                            {computed.map((it) => {
+                                const isOpen = openIds.has(it.collapseId);
+                                return (
+                                    <div className="accordion-item" key={it.id}>
+                                        <h2 className="accordion-header" id={it.headingId}>
+                                            <button
+                                                className={`accordion-button ${isOpen ? "" : "collapsed"}`}
+                                                type="button"
+                                                onClick={() => toggleOne(it.collapseId)}
+                                                aria-expanded="{isOpen}"
+                                                aria-controls={it.collapseId}
+                                            >
+                                                {it.icon ? <span className="me-2">{it.icon}</span> : null}
+                                                {it.title}
+                                            </button>
+                                        </h2>
+                                        <div
+                                            id={it.collapseId}
+                                            className="accordion-collapse collapse"
+                                            {...(singleOpen ? { "data-bs-parent": `#${accordionId}` } : {})}
                                         >
-                                            {it.icon ? <span className="me-2">{it.icon}</span> : null}
-                                            {it.title}
-                                        </button>
-                                    </h2>
-                                    <div
-                                        id={it.collapseId}
-                                        className="accordion-collapse collapse"
-                                        {...(singleOpen ? { "data-bs-parent": `#${accordionId}` } : {})}
-                                    >
-                                        <div className="accordion-body">{it.content}</div>
+                                            <div className="accordion-body">{it.content}</div>
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
+                                )
+                            })}
                         </div>
                         {/* /accordion */}
                     </div>
