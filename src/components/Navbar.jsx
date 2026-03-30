@@ -60,6 +60,11 @@ export default function Navbar({ onNavigate, onToggleTheme, theme, contrastClass
                                 🌐 Réseaux
                             </button>
                         </li>
+                        <li className="nav-item">
+                            <button className="btn btn-link nav-link" onClick={() => go("quizz_page")}>
+                                ⚡Quizz
+                            </button>
+                        </li>
                         <li className="nav-item ms-lg-3">
                             <button
                                 id="themeToggleGlobal"
